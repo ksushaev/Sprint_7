@@ -1,4 +1,4 @@
-package AllForCouriers;
+package all_for_couriers;
 
 public class Courier {
 

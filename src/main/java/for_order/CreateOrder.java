@@ -1,4 +1,4 @@
-package ForOrder;
+package for_order;
 
 public class CreateOrder {
     private String firstName;

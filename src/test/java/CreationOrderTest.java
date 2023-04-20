@@ -1,5 +1,5 @@
-import ForOrder.CreateOrder;
-import ForOrder.MethodsForOrder;
+import for_order.CreateOrder;
+import for_order.OrderClient;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
 import org.junit.Test;
@@ -22,7 +22,7 @@ public class CreationOrderTest {
     private String deliveryDate;
     private String comment;
     private String[] color;
-    private final MethodsForOrder order = new MethodsForOrder();
+    private final OrderClient order = new OrderClient();
 
 
     public CreationOrderTest(String firstName, String lastName, String address, String metroStation, String phone, int rentTime, String deliveryDate, String comment, String[] color) {
@@ -61,12 +61,10 @@ public class CreationOrderTest {
     @Test
     @DisplayName("Получение списка заказов")
     public void getListOfOrdersTest() {
-        ValidatableResponse response =
-                given()
-                        .get("/api/v1/orders")
-                        .then().statusCode(200)
-                        .and()
-                        .assertThat().body("orders", notNullValue());
+        ValidatableResponse response = order.gettingListOfOrder()
+                .statusCode(200)
+                .and()
+                .assertThat().body("orders", notNullValue());
     }
 }
 

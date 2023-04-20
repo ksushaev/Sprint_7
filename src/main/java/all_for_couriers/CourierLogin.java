@@ -1,4 +1,6 @@
-package AllForCouriers;
+package all_for_couriers;
+
+import io.restassured.response.ValidatableResponse;
 
 public class CourierLogin {
 

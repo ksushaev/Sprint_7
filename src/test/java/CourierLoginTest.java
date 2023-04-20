@@ -1,15 +1,17 @@
-import AllForCouriers.Courier;
-import AllForCouriers.CourierClient;
-import AllForCouriers.CourierLogin;
-import AllForCouriers.DataForCourier;
+import all_for_couriers.Courier;
+import all_for_couriers.CourierClient;
+import all_for_couriers.CourierLogin;
+import all_for_couriers.DataForCourier;
+import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
 import org.apache.http.HttpStatus;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
-import static org.apache.http.HttpStatus.SC_NOT_FOUND;
+import static org.apache.http.HttpStatus.*;
+import static org.apache.http.HttpStatus.SC_CONFLICT;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
@@ -17,8 +19,10 @@ import static org.junit.Assert.assertEquals;
 public class CourierLoginTest {
 
     private CourierClient courierClient;
-
     private final DataForCourier dataForCourier = new DataForCourier();
+    private int courierId;
+
+    private Courier courier;
 
     @Before
     public void setUp() {
@@ -29,15 +33,13 @@ public class CourierLoginTest {
     @DisplayName("Курьер может авторизоваться")
     public void courierAutorizationTest() {
         Courier courier = dataForCourier.dataForCourier();
-        ValidatableResponse response = courierClient.create(courier);
+        ValidatableResponse response = courierClient.createCourier(courier);
         CourierLogin login = CourierLogin.loginFrom(courier);
         ValidatableResponse loginResponse = courierClient.login(login)
                 .assertThat().body("id", notNullValue());
-        assertEquals(HttpStatus.SC_OK, loginResponse.extract().statusCode());
+        courierId = loginResponse.extract().path("id");
 
-        //удаляем курьера после создания
-        int courierId = loginResponse.extract().path("id");
-        courierClient.delete(courierId);
+        assertEquals(HttpStatus.SC_OK, loginResponse.extract().statusCode());
     }
 
     @Test
@@ -54,12 +56,16 @@ public class CourierLoginTest {
     @DisplayName("Курьер без пароля")
     public void courierWithoutOneFieldTest() {
         Courier courier = dataForCourier.dataForCourier();
-        ValidatableResponse response = courierClient.create(courier);
+        ValidatableResponse response = courierClient.createCourier(courier);
         CourierLogin login = CourierLogin.loginFrom(courier);
         login.setPassword("");
         ValidatableResponse loginResponse = courierClient.login(login)
                 .assertThat().body("message", equalTo("Недостаточно данных для входа"))
                 .and()
                 .statusCode(SC_BAD_REQUEST);
+    }
+    @After
+    public void deleteCourier() {
+        courierClient.delete(courierId);
     }
 }
